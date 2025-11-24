@@ -1,6 +1,17 @@
 # AdventOfCode
 
-**TODO: Add description**
+Para jugar a un día random:
+```bash
+mix aoc.set -y 2023 -d 3
+
+mix aoc.create
+
+xdg-open (mix aoc.url | grep 'https') # esta sintaxis es de fish, para bash con un $ delante del paréntesis
+
+mix test
+
+mix aoc.run
+```
 
 ## Installation
 
