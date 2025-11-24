@@ -38,14 +38,10 @@ defmodule AdventOfCode.Solutions.Y23.Day02 do
     problem
     |> Enum.filter(fn {_id_partida, partida} ->
       # que haya alguna ronda en la que se muestre más que el máximo de un color
-      partida
-      |> Enum.any?(fn {_id_ronda, ronda} ->
+      not Enum.any?(partida, fn {_id_ronda, ronda} ->
         ronda.blue > @blue_cubes or ronda.green > @green_cubes || ronda.red > @red_cubes
       end)
-      |> then(fn x -> not x end)
     end)
-    # condición de que un partido sea válido
-    # EN PRINCIPIO, extrae el id de los mapas en una lista
     |> Enum.map(fn {clave, _valor} -> clave end)
     |> Enum.sum()
   end
@@ -57,16 +53,17 @@ defmodule AdventOfCode.Solutions.Y23.Day02 do
     problem
     |> Enum.map(fn {_id, partida} ->
       partida
-      |> Enum.reduce(%{:red => 0, :blue => 0, :green => 0}, fn {_id_p, partida}, acc ->
+      |> Enum.reduce(%{:red => 0, :blue => 0, :green => 0}, fn {_id_r,
+                                                                %{red: r, blue: b, green: g}},
+                                                               acc ->
         %{
-          :red => Kernel.max(partida.red, acc.red),
-          :blue => Kernel.max(partida.blue, acc.blue),
-          :green => Kernel.max(partida.green, acc.green)
+          red: max(r, acc.red),
+          blue: max(b, acc.blue),
+          green: max(g, acc.green)
         }
       end)
     end)
     |> Enum.map(fn partida -> partida.red * partida.blue * partida.green end)
     |> Enum.sum()
-
   end
 end
