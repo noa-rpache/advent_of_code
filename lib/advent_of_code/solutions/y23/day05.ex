@@ -1,6 +1,16 @@
 defmodule AdventOfCode.Solutions.Y23.Day05 do
   alias AoC.Input
 
+  @mapping_order [
+    :seed_to_soil,
+    :soil_to_fertilizer,
+    :fertilizer_to_water,
+    :water_to_light,
+    :light_to_temperature,
+    :temperature_to_humidity,
+    :humidity_to_location
+  ]
+
   def parse(input, _part) do
     Input.stream!(input, trim: true)
     |> Enum.reduce({%{}, nil}, fn
@@ -81,23 +91,13 @@ defmodule AdventOfCode.Solutions.Y23.Day05 do
   end
 
   def part_one(problem) do
-    # Voy a asumir que conozco la estructura de datos, por lo que sea, y voy a ejecutar en orden:
-    # seed_to_soil
-    # soil_to_fertilizer
-    # fertilizer_to_water
-    # water_to_light
-    # light_to_temperature
-    # temperature_to_humidity
-    # humidity_to_location
-
+    # Voy a asumir que conozco la estructura de datos y definir el orden de ejecución de las claves
     problem.seeds
-    |> Enum.map(fn seed -> source_to_dest_part1(problem.seed_to_soil, seed) end)
-    |> Enum.map(fn seed -> source_to_dest_part1(problem.soil_to_fertilizer, seed) end)
-    |> Enum.map(fn seed -> source_to_dest_part1(problem.fertilizer_to_water, seed) end)
-    |> Enum.map(fn seed -> source_to_dest_part1(problem.water_to_light, seed) end)
-    |> Enum.map(fn seed -> source_to_dest_part1(problem.light_to_temperature, seed) end)
-    |> Enum.map(fn seed -> source_to_dest_part1(problem.temperature_to_humidity, seed) end)
-    |> Enum.map(fn seed -> source_to_dest_part1(problem.humidity_to_location, seed) end)
+    |> Enum.map(fn seed ->
+      Enum.reduce(@mapping_order, seed, fn key, acc ->
+        source_to_dest_part1(Map.fetch!(problem, key), acc)
+      end)
+    end)
     |> Enum.min()
   end
 
@@ -126,7 +126,6 @@ defmodule AdventOfCode.Solutions.Y23.Day05 do
           | ok: [Range.shift(first_seed..last_source, first_dest + first_source) | ok_list],
             pending: [(last_source + 1)..last_seed | pending_list]
         }
-
 
       first_seed <= first_source and first_source <= last_seed and last_seed <= last_source ->
         # el source empieza en medio de las semillas y termina después de ellas
@@ -184,21 +183,12 @@ defmodule AdventOfCode.Solutions.Y23.Day05 do
       |> Enum.map(fn [a, b] -> a..(a + b - 1) end)
 
     seeds
-    |> Enum.map(fn seed -> source_to_dest(problem.seed_to_soil, seed) end)
-    |> List.flatten()
-    |> Enum.map(fn seed -> source_to_dest(problem.soil_to_fertilizer, seed) end)
-    |> List.flatten()
-    |> Enum.map(fn seed -> source_to_dest(problem.fertilizer_to_water, seed) end)
-    |> List.flatten()
-    |> Enum.map(fn seed -> source_to_dest(problem.water_to_light, seed) end)
-    |> List.flatten()
-    |> Enum.map(fn seed -> source_to_dest(problem.light_to_temperature, seed) end)
-    |> List.flatten()
-    |> Enum.map(fn seed -> source_to_dest(problem.temperature_to_humidity, seed) end)
-    |> List.flatten()
-    |> Enum.map(fn seed -> source_to_dest(problem.humidity_to_location, seed) end)
-    |> List.flatten()
-    |> Enum.map(fn init.._last//_ -> init end)
+    |> Enum.flat_map(fn seed_range ->
+      Enum.reduce(@mapping_order, [seed_range], fn key, ranges ->
+        Enum.flat_map(ranges, &source_to_dest(problem[key], &1))
+      end)
+    end)
+    |> Enum.map(fn first.._last//_ -> first end)
     |> Enum.min()
   end
 end
