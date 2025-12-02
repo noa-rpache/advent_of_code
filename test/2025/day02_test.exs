@@ -40,7 +40,7 @@ defmodule AdventOfCode.Solutions.Y25.Day02Test do
   # You may also implement a test to validate the part two to ensure that you
   # did not broke your shared modules when implementing another problem.
 
-  @part_two_solution 58961152806
+  @part_two_solution 58_961_152_806
 
   test "part two solution" do
     assert {:ok, @part_two_solution} == AoC.run(2025, 2, :part_two)
