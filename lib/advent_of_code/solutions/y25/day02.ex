@@ -56,7 +56,34 @@ defmodule AdventOfCode.Solutions.Y25.Day02 do
     |> Enum.sum()
   end
 
-  # def part_two(problem) do
-  #   problem
-  # end
+  # esto te da los IDs no válidos en un rango
+  defp proccess_single_range_part_two(_ini.._fin//_step = range) do
+    range
+    |> Enum.filter(fn e ->
+      string = Integer.to_string(e)
+
+      valid =
+        cond do
+          Regex.match?(~r"^(.+)\1+$", string) ->
+            # IO.inspect(e, label: "regex")
+            false
+
+          true ->
+            # IO.inspect(e, label: "valid")
+            true
+        end
+
+      not valid
+    end)
+
+    # |> IO.inspect(label: "range #{ini}..#{fin} result")
+  end
+
+  def part_two(problem) do
+    problem
+    |> Enum.map(&proccess_single_range_part_two/1)
+    # |> IO.inspect(label: "problem")
+    |> List.flatten()
+    |> Enum.sum()
+  end
 end
