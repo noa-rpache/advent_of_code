@@ -6,80 +6,102 @@ defmodule AdventOfCode.Solutions.Y25.Day04 do
   @typep pos :: {number(), number()}
 
   def parse(input, _part) do
-    # This function will receive the input path or an %AoC.Input.TestInput{}
-    # struct. To support the test you may read both types of input with either:
-    #
-    # * Input.stream!(input), equivalent to File.stream!/1
-    # * Input.stream!(input, trim: true), equivalent to File.stream!/2
-    # * Input.read!(input), equivalent to File.read!/1
-    #
-    # The role of your parse/2 function is to return a "problem" for the solve/2
-    # function.
-    #
-    # For instance:
-    #
-    # input
-    # |> Input.stream!()
-    # |> Enum.map!(&my_parse_line_function/1)
-
     Input.read!(input)
     |> String.split("\n")
     |> Enum.filter(&(&1 != ""))
-    # añade índice de fila
     |> Enum.with_index()
     |> Enum.flat_map(fn {row, row_idx} ->
       row
       |> String.graphemes()
-      # añade índice de columna
       |> Enum.with_index()
       |> Enum.flat_map(fn
-        {@paper_roll, col_idx} ->
-          # posición encontrada
-          [{row_idx, col_idx}]
-
-        _ ->
-          []
+        {@paper_roll, col_idx} -> [{row_idx, col_idx}]
+        _ -> []
       end)
     end)
   end
 
   @spec adyacent_to_pos(pos(), pos()) :: boolean
   defp adyacent_to_pos({row1, col1} = pos1, {row2, col2} = pos2) do
-    cond do
-      pos1 == pos2 ->
-        false
+    # Si quieres medir esto (puede ser muchísimo), descomenta:
+    # t0 = System.monotonic_time()
 
-      (row2 == row1 - 1 or row2 == row1 or row2 == row1 + 1) and
-          (col2 == col1 - 1 or col2 == col1 or col2 == col1 + 1) ->
-        true
+    result =
+      cond do
+        pos1 == pos2 ->
+          false
 
-      true ->
-        false
-    end
+        (row2 == row1 - 1 or row2 == row1 or row2 == row1 + 1) and
+            (col2 == col1 - 1 or col2 == col1 or col2 == col1 + 1) ->
+          true
+
+        true ->
+          false
+      end
+
+    # t1 = System.monotonic_time()
+    # IO.puts("adyacent_to_pos -> #{t1 - t0} ns")
+
+    result
+  end
+
+  @spec simplify_matrix([pos()]) :: {[pos()], number()}
+  defp simplify_matrix(paper_rolls) do
+    t0 = System.monotonic_time()
+
+    result =
+      paper_rolls
+      |> Enum.reduce({paper_rolls, [], 0}, fn x, {full_list, acc, lenght_acc} = full_acc ->
+        len =
+          Enum.filter(full_list, &adyacent_to_pos(&1, x))
+          |> length()
+
+        if len < @max_paper_rolls do
+          {full_list, [x | acc], lenght_acc + 1}
+        else
+          full_acc
+        end
+      end)
+      |> then(fn {full_list, filtered_list, length_filtered} ->
+        {Enum.reject(full_list, &(&1 in filtered_list)), length_filtered}
+      end)
+
+    t1 = System.monotonic_time()
+    IO.puts("simplify_matrix -> #{(t1 - t0) / 1_000_000} ms")
+
+    result
   end
 
   def part_one(problem) do
     problem
-    # |> IO.inspect()
-    |> Enum.reduce({problem, []}, fn x, {full_list, acc} = full_acc ->
-      len =
-        Enum.filter(full_list, &adyacent_to_pos(&1, x))
-        # |> IO.inspect(label: "adyacents to #{inspect(x)}")
-        |> length()
-
-      cond do
-        len < @max_paper_rolls -> {full_list, [x | acc]}
-        true -> full_acc
-      end
-    end)
+    |> simplify_matrix()
     |> elem(1)
-    |> Enum.uniq()
-    |> length()
-
-    # |> IO.inspect()
   end
 
-  # def part_two(problem) do
-  #   problem
-  # end
+  @spec simplify_matrix_repeteadly([pos()]) :: number()
+  defp simplify_matrix_repeteadly(problem) do
+    t0 = System.monotonic_time()
+
+    aux = fn aux, list, n ->
+      {updated_list, amount} = simplify_matrix(list)
+
+      if n == amount or amount == 0 do
+        n + amount
+      else
+        aux.(aux, updated_list, n + amount)
+      end
+    end
+
+    result = aux.(aux, problem, 0)
+
+    t1 = System.monotonic_time()
+    IO.puts("simplify_matrix_repeteadly -> #{(t1 - t0) / 1_000_000} ms")
+
+    result
+  end
+
+  def part_two(problem) do
+    problem
+    |> simplify_matrix_repeteadly()
+  end
 end

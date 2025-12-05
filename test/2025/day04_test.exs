@@ -55,29 +55,29 @@ defmodule AdventOfCode.Solutions.Y25.Day04Test do
     assert {:ok, @part_one_solution} == AoC.run(2025, 4, :part_one)
   end
 
-  # test "part two example" do
-  #   input = ~S"""
-  #   ..@@.@@@@.
-  #   @@@.@.@.@@
-  #   @@@@@.@.@@
-  #   @.@@@@..@.
-  #   @@.@@@@.@@
-  #   .@@@@@@@.@
-  #   .@.@.@.@@@
-  #   @.@@@.@@@@
-  #   .@@@@@@@@.
-  #   @.@.@@@.@.
-  #   """
+  test "part two example" do
+    input = ~S"""
+    ..@@.@@@@.
+    @@@.@.@.@@
+    @@@@@.@.@@
+    @.@@@@..@.
+    @@.@@@@.@@
+    .@@@@@@@.@
+    .@.@.@.@@@
+    @.@@@.@@@@
+    .@@@@@@@@.
+    @.@.@@@.@.
+    """
 
-  #   assert 43 == solve(input, :part_two)
-  # end
+    assert 43 == solve(input, :part_two)
+  end
 
   # You may also implement a test to validate the part two to ensure that you
   # did not broke your shared modules when implementing another problem.
 
-  # @part_two_solution CHANGE_ME
-  #
-  # test "part two solution" do
-  #   assert {:ok, @part_two_solution} == AoC.run(2025, 4, :part_two)
-  # end
+  @part_two_solution 8739
+
+  test "part two solution" do
+    assert {:ok, @part_two_solution} == AoC.run(2025, 4, :part_two)
+  end
 end
